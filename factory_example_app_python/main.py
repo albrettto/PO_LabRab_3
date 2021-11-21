@@ -24,24 +24,26 @@ def init_processor(source: str) -> DataProcessor:
 def run_processor(proc: DataProcessor) -> None:
     proc.run()
     proc.print_result()
+    proc.stat_for_period()
+
 
 if __name__ == '__main__':
     proc = init_processor("temperature.csv")
     if proc is not None:
         run_processor(proc)
-    proc = init_processor("humidity.csv")
-    if proc is not None:
-        run_processor(proc)
-    proc = init_processor("pressure.csv")
-    if proc is not None:
-        run_processor(proc)
-    proc = init_processor("wind_direction.csv")
-    if proc is not None:
-        run_processor(proc)
-    proc = init_processor("wind_speed.csv")
+
+    '''proc = init_processor("humidity.csv")
     if proc is not None:
         run_processor(proc)
 
-date_start = input('Введите начальную дату (гггг-мм-дд чч)') + ':00:00'
-date_end = input('Введите конечную дату (гггг-мм-дд чч)') + ':00:00'
-proc.stat_for_period(date_start, date_end)
+    proc = init_processor("pressure.csv")
+    if proc is not None:
+        run_processor(proc)
+
+    proc = init_processor("wind_direction.csv")
+    if proc is not None:
+        run_processor(proc)
+
+    proc = init_processor("wind_speed.csv")
+    if proc is not None:
+        run_processor(proc)'''

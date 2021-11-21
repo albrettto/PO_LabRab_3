@@ -20,7 +20,6 @@ class DataProcessor(ABC):
         self._max_value = None          # максимальное значение
         self._min_value = None          # минимальное значение
         self._average_value = None      # среднее значение
-        self._slice = None              # срез данных???
 
     # Метод, инициализирующий источник данных
     # Все методы, помеченные декоратором @abstractmethod, ОБЯЗАТЕЛЬНЫ для переопределения
@@ -51,15 +50,26 @@ class DataProcessor(ABC):
     def print_result(self):
         pass
 
+    # Абстрактный метод для поиска аномальных значений (максимум и минимум за весь период)
     @abstractmethod
-    def stat_for_period(self, date_start, date_end):
+    def search_abnormal_value(self):
+        pass
+
+    # Абстрактный метод для поиска среднего значение за весь период
+    def search_average_value(self):
+        pass
+
+    # Абстрактный метод для выявления статистики за определенный период
+    @abstractmethod
+    def stat_for_period(self):
         pass
 
 # Реализация класса-обработчика csv-файлов
 class CsvDataProcessor(DataProcessor):
-    # Переобпределяем конструктор родительского класса
+    # Переопределяем конструктор родительского класса
     def __init__(self, datasource):
-        DataProcessor.__init__(self, datasource)    # инициализируем конструктор родительского класса для получения общих атрибутов
+        # инициализируем конструктор родительского класса для получения общих атрибутов
+        DataProcessor.__init__(self, datasource)
         self.separator = ';'        # дополнительный атрибут - сепаратор по умолчанию
     """
         Переопределяем метод инициализации источника данных.
@@ -79,25 +89,34 @@ class CsvDataProcessor(DataProcessor):
             print(str(e))
             return False
 
-    #    Сортируем данные по значениям колонки "datetime" и сохраняем результат в атрибуте result
+    # Сортируем данные по значениям введенной колонки и сохраняем результат в атрибуте result
     def run(self):
-        self.result = self.sort_data_by_col(self._dataset, "datetime", True)
+        sort_by = input('Введите столбец по которому нужно сортировать: ')
+        self.result = self.sort_data_by_col(self._dataset, sort_by, True)
 
+    # Поиск аномальных значений (максимум и минимум за весь период)
     def search_abnormal_value(self):
-        self._max_value = self._dataset.max()
-        self._min_value = self._dataset.min()
+        self._max_value = self.result.max()
+        self._min_value = self.result.min()
 
+    # Среднее значение за весь период
     def search_average_value(self):
-        self._average_value = self._dataset.mean()
+        self._average_value = self.result.mean()
 
-    def stat_for_period(self, date_start, date_end):
-        result = self._slice[date_start <= self._dataset['datetime'] <= date_end]
+    # Статистика за определенный период (вводим диапазон с клавиатуры)
+    def stat_for_period(self):
+        date_start = input('Введите начальную дату (гггг-мм-дд чч): ') + ':00:00'
+        date_end = input('Введите конечную дату (гггг-мм-дд чч): ') + ':00:00'
+        result = self._dataset.loc[(self._dataset['datetime'] >= date_start) & (self._dataset['datetime'] <= date_end)]
         print(result)
-        #df.loc[(df['Items'] != 'Car') & amp;(df['Amount'] <= 3)]
 
+    # Вывод результатов работы
     def print_result(self):
-        print('Таблица из датасета: ', self._datasource, '\n', self.result)
+        print('Таблица из датасета (изначальная): ', self._datasource, '\n', self._dataset)
+        print('Таблица из датасета (отсортированная): ', '\n', self.result)
+        self.search_abnormal_value()
         print('Максимальное значение: \n', self._max_value, '\n', 'Минимальное значение: \n', self._min_value)
+        self.search_average_value()
         print('Среднее значение: \n', self._average_value)
 
 
